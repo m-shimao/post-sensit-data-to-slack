@@ -50,17 +50,20 @@ export default {
       Object.keys(params).length === 0 ||
       !('token' in params) ||
       params.token !== env.API_TOKEN ||
+      !('battery' in params) ||
       !('tempmsb' in params) ||
       !('templsb' in params) ||
       !('hum' in params)
     ) {
       return new Response('');
     }
+    const batteryTmp = (Number(params.battery) * 0.05 + 2.7 - 6) / 30 * 100;
+    const remainBattery = batteryTmp > 100 ? 100 : batteryTmp < 0 ? 0 : batteryTmp;
     const tempMsb = Number(params.tempmsb);
     const tempLsb = Number(params.templsb);
     const tmp = (tempLsb + tempMsb * 256 - 200) / 8;
     const hum = Number(params.hum) / 2;
 
-    return handleRequest(env.SLACK_URL, `温度は${tmp}度, 湿度は${hum}%です。`);
+    return handleRequest(env.SLACK_URL, `電池: ${remainBattery}%, 温度: ${tmp}度, 湿度: ${hum}%です。`);
 	},
 };
